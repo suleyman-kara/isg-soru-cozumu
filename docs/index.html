@@ -29,7 +29,6 @@ function home(sc){
  $.innerHTML=`<div class="card"><b>Kayıt</b><br>Çözülen: ${done}/${DATA.length} · Şu an yanlış: ${w}<br>
  Toplam doğru: ${tot[0]} · Toplam yanlış: ${tot[1]}</div>
  <div class="card"><div class="row"><select id="s" onchange="home(this.value)"><option value="500">İlk 500 (sorumlu)</option><option value="all">Tümü (1-1000)</option></select>
- <select id="t"><option value="all">Tüm testler</option>${tests.map(t=>`<option value="${t}">Test ${t}</option>`).join('')}</select>
  <select id="m"><option value="new">Çözülmemişler</option><option value="all">Hepsi</option></select>
  <button class="p" onclick="start()">Başla</button></div></div>
  <div class="card"><button class="p" onclick="startWrong()" ${w?'':'disabled'}>Yanlışları tekrar çöz (${w})</button>
@@ -37,9 +36,9 @@ function home(sc){
  if(sc)document.getElementById('s').value=sc;
 }
 function start(){
- const t=document.getElementById('t').value,m=document.getElementById('m').value;
+ const m=document.getElementById('m').value;
  const sc=document.getElementById('s').value;
- let l=DATA.filter(q=>(sc==='all'||q.id<=500)&&(t==='all'||q.test==+t));
+ let l=DATA.filter(q=>(sc==='all'||q.id<=500));
  if(m==='new')l=l.filter(q=>!S[q.id]);
  if(!l.length)return alert('Bu seçimde soru kalmadı.');
  run(shuffle(l));
