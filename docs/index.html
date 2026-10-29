@@ -64,23 +64,30 @@ function goQ(){const n=+document.getElementById('n').value,q=DATA.find(x=>x.id==
 function startFlag(){run(shuffle(flagList()))}
 function toggleFlag(){const q=queue[i];F[q.id]?delete F[q.id]:F[q.id]=1;saveF();document.getElementById('fl').textContent=F[q.id]?'★ İşaretli':'☆ İşaretle'}
 function startWrong(){run(shuffle(wrongList()))}
-function run(l){queue=l;i=0;sess={c:0,w:0};show()}
+let sel={};
+function run(l){queue=l;i=0;sess={c:0,w:0};sel={};show()}
+function go(d){i+=d;show()}
 function show(){
- if(i>=queue.length){$.innerHTML=`<div class="card"><b>Bitti!</b><br>Doğru: ${sess.c} · Yanlış: ${sess.w}</div><button class="p" onclick="home()">Ana sayfa</button>`;return}
+ if(i>=queue.length){$.innerHTML=`<div class="card"><b>Bitti!</b><br>Doğru: ${sess.c} · Yanlış: ${sess.w}</div><button onclick="go(-1)">Önceki</button> <button class="p" onclick="home()">Ana sayfa</button>`;return}
  const q=queue[i];answered=false;
  $.innerHTML=`<div class="row" style="justify-content:space-between"><small>${i+1}/${queue.length} · #${q.id}</small><button id="fl" onclick="toggleFlag()">${F[q.id]?'★ İşaretli':'☆ İşaretle'}</button></div><div class="card"><p>${q.question}</p>
  ${Object.entries(q.options).map(([k,v])=>`<button class="opt" id="o${k}" onclick="pick('${k}')"><b>${k})</b> ${v}</button>`).join('')}</div>
- <div class="row"><button onclick="home()">Çık</button><button class="p" id="nx" style="display:none" onclick="i++;show()">Sonraki</button></div>`;
+ <div class="row"><button onclick="home()">Çık</button><button onclick="go(-1)" ${i?'':'disabled'}>Önceki</button><button class="p" onclick="go(1)">Sonraki</button></div>`;
+ if(sel[q.id])mark(q,sel[q.id]);
+}
+function mark(q,k){
+ answered=true;
+ const acc=q.answers_accepted&&q.answers_accepted.length?q.answers_accepted:[q.answer];
+ acc.forEach(a=>document.getElementById('o'+a).classList.add('ok'));
+ if(!acc.includes(k))document.getElementById('o'+k).classList.add('bad');
 }
 function pick(k){
- if(answered)return;answered=true;const q=queue[i];
+ if(answered)return;const q=queue[i];sel[q.id]=k;
  const acc=q.answers_accepted&&q.answers_accepted.length?q.answers_accepted:[q.answer];
  const ok=acc.includes(k);
  const s=S[q.id]||(S[q.id]={c:0,w:0});
  ok?(s.c++,sess.c++):(s.w++,sess.w++);s.last=ok;save();
- acc.forEach(a=>document.getElementById('o'+a).classList.add('ok'));
- if(!ok)document.getElementById('o'+k).classList.add('bad');
- document.getElementById('nx').style.display='';
+ mark(q,k);
 }
 home();
 </script></body></html>
