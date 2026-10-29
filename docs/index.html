@@ -20,7 +20,12 @@ button:disabled{background:#ebebeb;color:rgba(0,0,0,.3);border-color:transparent
 .opt b{color:var(--t2);margin-right:4px}
 .ok{background:#e7f3e8!important;border-color:#057642!important;color:#05492a}
 .bad{background:#fdecea!important;border-color:#cc1016!important;color:#8a0b0f}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}label.f{display:block;margin:12px 0 0;color:var(--t2);font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.bar{height:8px;border-radius:4px;background:#e9e5df;margin:8px 0 16px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--blue);border-radius:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stats div{border:1px solid var(--line);border-radius:8px;padding:10px 4px}
+.stats span{display:block;font-size:24px;font-weight:600;line-height:1.2}
+label.f{display:block;margin:12px 0 0;color:var(--t2);font-size:12px}
 label.f select{display:block;width:100%;margin:4px 0 0;font-size:14px;padding:8px}
 label.f~button.p{margin-top:16px}
 button.x{border-color:#cc1016;color:#cc1016}
@@ -46,10 +51,11 @@ const wrongList=()=>DATA.filter(q=>(scope()==='all'||q.id<=500)&&S[q.id]&&S[q.id
 const shuffle=a=>{for(let k=a.length-1;k>0;k--){const j=Math.random()*(k+1)|0;[a[k],a[j]]=[a[j],a[k]]}return a};
 
 function home(){
- const done=DATA.filter(q=>S[q.id]).length,w=wrongList().length;
- const tot=Object.values(S).reduce((a,x)=>[a[0]+x.c,a[1]+x.w],[0,0]);
- $.innerHTML=`<div class="card"><b>Kayıt</b><br>Çözülen: ${done}/${DATA.length} · Şu an yanlış: ${w}<br>
- Toplam doğru: ${tot[0]} · Toplam yanlış: ${tot[1]}</div>
+ const inS=DATA.filter(q=>P.s==='all'||q.id<=500),done=inS.filter(q=>S[q.id]).length,w=wrongList().length;
+ const tot=Object.values(S).reduce((a,x)=>[a[0]+x.c,a[1]+x.w],[0,0]),pct=Math.round(done/inS.length*100);
+ $.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><b>İlerleme</b><small>${done} / ${inS.length} soru · %${pct}</small></div>
+ <div class="bar"><i style="width:${pct}%"></i></div>
+ <div class="stats"><div><span style="color:#057642">${tot[0]}</span><small>Toplam doğru</small></div><div><span style="color:#cc1016">${tot[1]}</span><small>Toplam yanlış</small></div><div><span style="color:var(--blue)">${w}</span><small>Tekrar bekleyen</small></div></div></div>
  <div class="card"><b>Çözüm ayarları</b>
  <label class="f">Kapsam<select onchange="P.s=this.value;home()"><option value="500">İlk 500 (sorumlu olduğumuz kısım)</option><option value="all">Tümü (1-1000)</option></select></label>
  <label class="f">Hangi sorular<select onchange="P.m=this.value;home()"><option value="new">Sadece henüz çözmediklerim</option><option value="all">Hepsi (çözdüklerim dahil)</option></select></label>
