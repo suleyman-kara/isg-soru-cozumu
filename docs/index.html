@@ -31,6 +31,7 @@ function home(sc){
  <div class="card"><div class="row"><select id="s" onchange="home(this.value)"><option value="500">İlk 500 (sorumlu)</option><option value="all">Tümü (1-1000)</option></select>
  <select id="m"><option value="new">Çözülmemişler</option><option value="all">Hepsi</option></select>
  <button class="p" onclick="start()">Başla</button></div></div>
+ <div class="card"><div class="row"><input id="n" type="number" min="1" placeholder="Soru no" style="padding:10px;width:110px;border-radius:8px;border:1px solid #bbb" onkeydown="if(event.key==='Enter')goQ()"><button class="p" onclick="goQ()">Soruya git</button></div></div>
  <div class="card"><button class="p" onclick="startWrong()" ${w?'':'disabled'}>Yanlışları tekrar çöz (${w})</button>
  <button onclick="if(confirm('Tüm kayıt silinsin mi?')){S={};save();home()}">Kaydı sıfırla</button></div>`;
  if(sc)document.getElementById('s').value=sc;
@@ -43,6 +44,7 @@ function start(){
  if(!l.length)return alert('Bu seçimde soru kalmadı.');
  run(shuffle(l));
 }
+function goQ(){const n=+document.getElementById('n').value,q=DATA.find(x=>x.id===n);if(!q)return alert('Bu numarada soru yok (silinmiş ya da kaynakta eksik olabilir).');run([q])}
 function startWrong(){run(shuffle(wrongList()))}
 function run(l){queue=l;i=0;sess={c:0,w:0};show()}
 function show(){
