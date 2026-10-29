@@ -20,7 +20,12 @@ button:disabled{background:#ebebeb;color:rgba(0,0,0,.3);border-color:transparent
 .opt b{color:var(--t2);margin-right:4px}
 .ok{background:#e7f3e8!important;border-color:#057642!important;color:#05492a}
 .bad{background:#fdecea!important;border-color:#cc1016!important;color:#8a0b0f}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}small{color:var(--t2);font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}label.f{display:block;margin:12px 0 0;color:var(--t2);font-size:12px}
+label.f select{display:block;width:100%;margin:4px 0 0;font-size:14px;padding:8px}
+label.f~button.p{margin-top:16px}
+button.x{border-color:#cc1016;color:#cc1016}
+button.x:hover:not(:disabled){background:#fdecea;box-shadow:inset 0 0 0 1px #cc1016}
+small{color:var(--t2);font-size:12px}
 </style></head><body>
 <h2>İSG Vize Soru Çözümü</h2><div id="app"></div>
 <script>
@@ -34,36 +39,40 @@ const flagList=()=>DATA.filter(q=>F[q.id]);
 const $=document.getElementById('app');
 let queue=[],i=0,answered=false,sess={c:0,w:0};
 const tests=[...new Set(DATA.map(q=>q.test))].sort((a,b)=>a-b);
-const scope=()=>{const e=document.getElementById('s');return e?e.value:'500'};
+let P={s:'500',m:'new',o:'seq'};
+const scope=()=>P.s;
+const order=l=>P.o==='rnd'?shuffle(l):l.slice().sort((a,b)=>a.id-b.id);
 const wrongList=()=>DATA.filter(q=>(scope()==='all'||q.id<=500)&&S[q.id]&&S[q.id].last===false);
 const shuffle=a=>{for(let k=a.length-1;k>0;k--){const j=Math.random()*(k+1)|0;[a[k],a[j]]=[a[j],a[k]]}return a};
 
-function home(sc){
+function home(){
  const done=DATA.filter(q=>S[q.id]).length,w=wrongList().length;
  const tot=Object.values(S).reduce((a,x)=>[a[0]+x.c,a[1]+x.w],[0,0]);
  $.innerHTML=`<div class="card"><b>Kayıt</b><br>Çözülen: ${done}/${DATA.length} · Şu an yanlış: ${w}<br>
  Toplam doğru: ${tot[0]} · Toplam yanlış: ${tot[1]}</div>
- <div class="card"><div class="row"><select id="s" onchange="home(this.value)"><option value="500">İlk 500 (sorumlu)</option><option value="all">Tümü (1-1000)</option></select>
- <select id="m"><option value="new">Çözülmemişler</option><option value="all">Hepsi</option></select>
- <button class="p" onclick="start()">Başla</button></div></div>
+ <div class="card"><b>Çözüm ayarları</b>
+ <label class="f">Kapsam<select onchange="P.s=this.value;home()"><option value="500">İlk 500 (sorumlu olduğumuz kısım)</option><option value="all">Tümü (1-1000)</option></select></label>
+ <label class="f">Hangi sorular<select onchange="P.m=this.value;home()"><option value="new">Sadece henüz çözmediklerim</option><option value="all">Hepsi (çözdüklerim dahil)</option></select></label>
+ <label class="f">Sıralama<select onchange="P.o=this.value;home()"><option value="seq">Soru numarasına göre</option><option value="rnd">Rastgele</option></select></label>
+ <button class="p" onclick="start()">Çözmeye başla</button></div>
  <div class="card"><div class="row"><input id="n" type="number" min="1" placeholder="Soru no" style="padding:10px;width:110px;border-radius:8px;border:1px solid #bbb" onkeydown="if(event.key==='Enter')goQ()"><button class="p" onclick="goQ()">Soruya git</button></div></div>
  <div class="card"><button class="p" onclick="startFlag()" ${flagList().length?'':'disabled'}>İşaretlileri çöz (${flagList().length})</button></div>
  <div class="card"><button class="p" onclick="startWrong()" ${w?'':'disabled'}>Yanlışları tekrar çöz (${w})</button>
  <button onclick="if(confirm('Tüm kayıt silinsin mi?')){S={};save();home()}">Kaydı sıfırla</button></div>`;
- if(sc)document.getElementById('s').value=sc;
+
+ ['s','m','o'].forEach((k,n)=>{document.querySelectorAll('.card select')[n].value=P[k]});
 }
 function start(){
- const m=document.getElementById('m').value;
- const sc=document.getElementById('s').value;
- let l=DATA.filter(q=>(sc==='all'||q.id<=500));
+ const m=P.m;
+ let l=DATA.filter(q=>(P.s==='all'||q.id<=500));
  if(m==='new')l=l.filter(q=>!S[q.id]);
  if(!l.length)return alert('Bu seçimde soru kalmadı.');
- run(shuffle(l));
+ run(order(l));
 }
 function goQ(){const n=+document.getElementById('n').value,q=DATA.find(x=>x.id===n);if(!q)return alert('Bu numarada soru yok (silinmiş ya da kaynakta eksik olabilir).');run([q])}
-function startFlag(){run(shuffle(flagList()))}
+function startFlag(){run(order(flagList()))}
 function toggleFlag(){const q=queue[i];F[q.id]?delete F[q.id]:F[q.id]=1;saveF();document.getElementById('fl').textContent=F[q.id]?'★ İşaretli':'☆ İşaretle'}
-function startWrong(){run(shuffle(wrongList()))}
+function startWrong(){run(order(wrongList()))}
 let sel={};
 function run(l){queue=l;i=0;sess={c:0,w:0};sel={};show()}
 function go(d){i+=d;show()}
@@ -72,7 +81,7 @@ function show(){
  const q=queue[i];answered=false;
  $.innerHTML=`<div class="row" style="justify-content:space-between"><small>${i+1}/${queue.length} · #${q.id}</small><button id="fl" onclick="toggleFlag()">${F[q.id]?'★ İşaretli':'☆ İşaretle'}</button></div><div class="card"><p>${q.question}</p>
  ${Object.entries(q.options).map(([k,v])=>`<button class="opt" id="o${k}" onclick="pick('${k}')"><b>${k})</b> ${v}</button>`).join('')}</div>
- <div class="row"><button onclick="home()">Çık</button><button onclick="go(-1)" ${i?'':'disabled'}>Önceki</button><button class="p" onclick="go(1)">Sonraki</button></div>`;
+ <div class="row"><button class="x" onclick="home()">Çık</button><button onclick="go(-1)" ${i?'':'disabled'}>Önceki</button><button class="p" onclick="go(1)">Sonraki</button></div>`;
  if(sel[q.id])mark(q,sel[q.id]);
 }
 function mark(q,k){
