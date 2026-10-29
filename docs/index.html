@@ -25,6 +25,8 @@ button:disabled{background:#ebebeb;color:rgba(0,0,0,.3);border-color:transparent
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
 .stats div{border:1px solid var(--line);border-radius:8px;padding:10px 4px}
 .stats span{display:block;font-size:24px;font-weight:600;line-height:1.2}
+.opt.prev{border-style:dashed;border-color:var(--blue)}
+.opt em{float:right;font-style:normal;font-size:12px;color:var(--blue)}
 label.f{display:block;margin:12px 0 0;color:var(--t2);font-size:12px}
 label.f select{display:block;width:100%;margin:4px 0 0;font-size:14px;padding:8px}
 label.f~button.p{margin-top:16px}
@@ -89,19 +91,22 @@ function show(){
  ${Object.entries(q.options).map(([k,v])=>`<button class="opt" id="o${k}" onclick="pick('${k}')"><b>${k})</b> ${v}</button>`).join('')}</div>
  <div class="row"><button class="x" onclick="home()">Çık</button><button onclick="go(-1)" ${i?'':'disabled'}>Önceki</button><button class="p" onclick="go(1)">Sonraki</button></div>`;
  if(sel[q.id])mark(q,sel[q.id]);
+ else if(S[q.id]&&S[q.id].sel)tag(S[q.id].sel);
 }
+function tag(k,t){const o=document.getElementById('o'+k);o.classList.add('prev');o.insertAdjacentHTML('beforeend','<em>'+(t||'önceki seçimin')+'</em>')}
 function mark(q,k){
  answered=true;
  const acc=q.answers_accepted&&q.answers_accepted.length?q.answers_accepted:[q.answer];
  acc.forEach(a=>document.getElementById('o'+a).classList.add('ok'));
  if(!acc.includes(k))document.getElementById('o'+k).classList.add('bad');
+ document.querySelectorAll('.opt em').forEach(x=>x.remove());document.querySelectorAll('.prev').forEach(x=>x.classList.remove('prev'));tag(k,'seçimin');
 }
 function pick(k){
  if(answered)return;const q=queue[i];sel[q.id]=k;
  const acc=q.answers_accepted&&q.answers_accepted.length?q.answers_accepted:[q.answer];
  const ok=acc.includes(k);
  const s=S[q.id]||(S[q.id]={c:0,w:0});
- ok?(s.c++,sess.c++):(s.w++,sess.w++);s.last=ok;save();
+ ok?(s.c++,sess.c++):(s.w++,sess.w++);s.last=ok;s.sel=k;save();
  mark(q,k);
 }
 home();
