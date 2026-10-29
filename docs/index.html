@@ -68,9 +68,9 @@ function run(l){queue=l;i=0;sess={c:0,w:0};show()}
 function show(){
  if(i>=queue.length){$.innerHTML=`<div class="card"><b>Bitti!</b><br>Doğru: ${sess.c} · Yanlış: ${sess.w}</div><button class="p" onclick="home()">Ana sayfa</button>`;return}
  const q=queue[i];answered=false;
- $.innerHTML=`<small>${i+1}/${queue.length} · Test ${q.test} · #${q.id}</small><div class="card"><p>${q.question}</p>
+ $.innerHTML=`<div class="row" style="justify-content:space-between"><small>${i+1}/${queue.length} · #${q.id}</small><button id="fl" onclick="toggleFlag()">${F[q.id]?'★ İşaretli':'☆ İşaretle'}</button></div><div class="card"><p>${q.question}</p>
  ${Object.entries(q.options).map(([k,v])=>`<button class="opt" id="o${k}" onclick="pick('${k}')"><b>${k})</b> ${v}</button>`).join('')}</div>
- <div class="row"><button onclick="home()">Çık</button><button id="fl" onclick="toggleFlag()">${F[q.id]?'★ İşaretli':'☆ İşaretle'}</button><button class="p" id="nx" style="display:none" onclick="i++;show()">Sonraki</button></div>`;
+ <div class="row"><button onclick="home()">Çık</button><button class="p" id="nx" style="display:none" onclick="i++;show()">Sonraki</button></div>`;
 }
 function pick(k){
  if(answered)return;answered=true;const q=queue[i];
